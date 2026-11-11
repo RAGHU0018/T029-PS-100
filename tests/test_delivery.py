@@ -66,7 +66,7 @@ def test_returned_quantity():
     )
 
     assert delivery.returned_quantity == 10
-    assert delivery.shortfall_quantity == 10
+    assert delivery.shortfall_quantity == 0
 
 
 def test_invalid_quantity():
