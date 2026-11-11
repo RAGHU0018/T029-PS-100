@@ -1,0 +1,11 @@
+vehicle_id,depot_id,vehicle_type,capacity_kg,speed_kmph,driver_name,duty_hours_used
+V-01,D-1,TRUCK,5000,30,Venkatesh Chowdhury,11.0
+V-02,D-1,TRUCK,5000,30,Rohit Patil,0.0
+V-03,D-1,TRUCK,5000,30,Arjun Naik,2.0
+V-04,D-1,BOAT,1000,20,Raghav Verma,0.0
+V-05,D-2,HELICOPTER,2000,120,Capt. Tejas Bhat,0.0
+V-06,D-2,BOAT,1000,20,Ravi Sheikh,10.0
+V-07,D-2,TRUCK,5000,30,Rajesh Pillai,0.0
+V-08,D-2,TRUCK,5000,30,Raghav Patil,1.5
+V-09,D-3,TRUCK,5000,30,Farhan Jain,0.0
+V-10,D-3,TRUCK,5000,30,Chetan Hegde,0.0

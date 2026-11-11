@@ -1,0 +1,16 @@
+camp_id,zone_id,camp_name,capacity,occupancy,children,elderly,pregnant,opened_ts
+C01,Z1,Bahadurpur Primary School,360,300,66,42,12,2026-08-08 15:00:00
+C02,Z1,Bahadurpur Panchayat Bhawan,300,260,42,27,9,2026-08-08 15:00:00
+C03,Z2,Hayaghat High School,400,320,52,33,11,2026-08-08 15:00:00
+C04,Z2,Hayaghat Community Hall,400,320,52,33,11,2026-08-08 15:00:00
+C05,Z3,Kusheshwar East Embankment Camp,350,300,41,26,8,2026-08-08 15:00:00
+C06,Z3,Kusheshwar East Railway Halt,320,280,38,24,8,2026-08-08 15:00:00
+C07,Z3,Kusheshwar East Block Office,300,260,35,22,8,2026-08-08 15:00:00
+C08,Z4,Gaura Bauram Madrasa,200,150,24,15,6,2026-08-08 15:00:00
+C09,Z4,Gaura Bauram Inter College,200,310,44,28,8,2026-08-08 15:00:00
+C10,Z5,Keoti Kisan Bhawan,320,280,30,19,7,2026-08-08 15:00:00
+C11,Z5,Keoti Stadium,250,280,33,21,6,2026-08-08 15:00:00
+C12,Z6,Biraul Anganwadi,120,50,6,4,2,2026-08-08 15:00:00
+C13,Z7,Benipur North Degree College,260,200,27,17,6,2026-08-08 15:00:00
+C14,Z7,Benipur North Health Sub-centre,300,250,38,24,8,2026-08-08 15:00:00
+C15,Z8,Alinagar Market Yard,280,230,33,21,6,2026-08-08 15:00:00

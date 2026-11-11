@@ -1,0 +1,13 @@
+item_id,item_name,unit,unit_weight_kg,daily_norm_per_person,shelf_life_days,priority_class,medicine
+WATER,Drinking water,litre,1.000,3,180,LIFE_SAVING,false
+ORS,ORS sachet,sachet,0.030,0.5,365,LIFE_SAVING,false
+MEDKIT,Medicine kit,kit,2.000,0.02,365,LIFE_SAVING,true
+CHLORINE,Chlorine tablet strip,strip,0.010,0.2,730,LIFE_SAVING,false
+RICE,Rice,kg,1.000,0.4,365,FOOD,false
+DAL,Dal,kg,1.000,0.08,365,FOOD,false
+FOODPKT,Cooked food packet,packet,0.500,1,5,FOOD,false
+MILKPWD,Milk powder,kg,1.000,0.03,180,FOOD,false
+BISCUIT,Biscuit pack,pack,0.200,0.5,120,FOOD,false
+TARP,Tarpaulin sheet,sheet,3.000,0.1,1800,SHELTER,false
+BLANKET,Blanket,piece,1.500,0.25,1800,SHELTER,false
+MOSQNET,Mosquito net,piece,0.500,0.25,1800,SHELTER,false

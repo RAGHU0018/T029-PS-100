@@ -1,0 +1,9 @@
+zone_id,zone_name,severity,road_status,serving_depot_id
+Z1,Bahadurpur,5,OPEN,D-1
+Z2,Hayaghat,4,OPEN,D-1
+Z3,Kusheshwar East,5,BLOCKED,D-2
+Z4,Gaura Bauram,3,PARTIAL,D-2
+Z5,Keoti,4,OPEN,D-1
+Z6,Biraul,2,OPEN,D-2
+Z7,Benipur North,3,OPEN,D-3
+Z8,Alinagar,2,PARTIAL,D-3
