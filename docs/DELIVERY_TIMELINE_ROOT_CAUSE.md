@@ -1,4 +1,6 @@
-# Official delivery timeline root-cause investigation
+# Historical delivery timeline root-cause investigation
+
+> **Historical snapshot:** the initial findings and 18-row mismatch analysis below describe the 70/88 baseline before the final allocation-eligibility correction. The current validated result is documented in [DELIVERY_SCHEDULE_RECONSTRUCTION.md](DELIVERY_SCHEDULE_RECONSTRUCTION.md): all 88 sample deliveries are accounted for, with 82 `OK` and six `DISCREPANCY` records. The older sections are retained as the investigation history; use the reconstruction report for current results.
 
 Read-only investigation of the 18 delivery commands rejected by the current official sample run. Command positions below are physical lines in `data/input/commands.txt` (comments included). “Last cycle” is the preceding CYCLE command. A manifest listed as a final candidate was compared by camp, item and batch; it is an exact match only if its trip ID also matches.
 
