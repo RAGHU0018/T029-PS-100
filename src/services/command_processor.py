@@ -42,7 +42,9 @@ class CommandProcessor:
         items=None,
         inventory_manager=None,
         receipt_rows=None,
-        zones=None
+        zones=None,
+        request_manager=None,
+        overflow_manager=None
     ):
         if isinstance(request_rows, dict):
             self.request_rows = request_rows.copy()
@@ -64,6 +66,8 @@ class CommandProcessor:
         self.items = items or {}
         self.zones = zones or {}
         self.inventory_manager = inventory_manager
+        self.request_manager = request_manager
+        self.overflow_manager = overflow_manager
 
         self.request_history = []
         self.active_requests = {}
@@ -196,6 +200,12 @@ class CommandProcessor:
 
         request_key = (camp_id, item_id)
 
+        if self.request_manager is not None:
+            try:
+                self.request_manager.register(request)
+            except ValueError as exc:
+                raise CommandProcessorError(str(exc)) from exc
+
         self.active_requests[request_key] = request
         self.request_history.append(request)
         self.processed_request_ids.add(request_id)
@@ -270,6 +280,16 @@ class CommandProcessor:
             )
 
         previous_occupancy = camp.occupancy
+        if self.overflow_manager is not None:
+            try:
+                arrival_record = self.overflow_manager.register_arrival(
+                    camp_id, arrival_time, persons
+                )
+            except ValueError as exc:
+                raise CommandProcessorError(str(exc)) from exc
+            self.arrival_history.append(arrival_record)
+            return arrival_record
+
         camp.occupancy += persons
 
         arrival_record = {
