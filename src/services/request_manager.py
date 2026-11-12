@@ -41,6 +41,11 @@ class RequestManager:
         self.items = items
         self.requests: dict[str, ManagedRequest] = {}
         self.active: dict[tuple[str, str], ManagedRequest] = {}
+        self.rejected: dict[str, str] = {}
+
+    def record_rejection(self, request_id: str, reason: str) -> None:
+        if request_id:
+            self.rejected[request_id] = reason
 
     @staticmethod
     def calculate_need(occupancy: int, daily_norm: float, stock_on_hand: int) -> int:

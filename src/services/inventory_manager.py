@@ -133,8 +133,6 @@ class InventoryManager:
                 f"Receipt '{receipt_id}' has already been processed."
             )
 
-        self.processed_receipts.add(receipt_id)
-
         item_id = receipt["item_id"]
 
         if item_id not in self.items:
@@ -154,6 +152,7 @@ class InventoryManager:
         is_donation = source == StockSource.DONATION
 
         if is_donation and expiry_date - received_at < timedelta(days=7):
+            self.processed_receipts.add(receipt_id)
             self.rejected_receipts.append({
                 "receipt_id": receipt_id,
                 "batch_id": receipt["batch_id"],
@@ -184,6 +183,7 @@ class InventoryManager:
         )
 
         self.add_batch(batch)
+        self.processed_receipts.add(receipt_id)
         return batch
 
     def verify_batch(

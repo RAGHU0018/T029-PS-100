@@ -11,7 +11,7 @@ class PriorityEngine:
     def __init__(self, camps, zones, last_deliveries=None):
         self.camps = camps
         self.zones = zones
-        self.last_deliveries = last_deliveries or {}
+        self.last_deliveries = last_deliveries if last_deliveries is not None else {}
 
     def score(self, managed, at: datetime) -> float:
         request = managed.request

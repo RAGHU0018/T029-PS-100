@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 from src.services.inventory_manager import InventoryManager, InventoryError
 from src.models.request import Request, Urgency
 from src.models.zone import RoadStatus
+from src.services.delivery_processor import DeliveryProcessorError
 
 
 class CommandProcessorError(Exception):
@@ -44,7 +45,9 @@ class CommandProcessor:
         receipt_rows=None,
         zones=None,
         request_manager=None,
-        overflow_manager=None
+        overflow_manager=None,
+        cycle_engine=None,
+        delivery_processor=None
     ):
         if isinstance(request_rows, dict):
             self.request_rows = request_rows.copy()
@@ -68,6 +71,8 @@ class CommandProcessor:
         self.inventory_manager = inventory_manager
         self.request_manager = request_manager
         self.overflow_manager = overflow_manager
+        self.cycle_engine = cycle_engine
+        self.delivery_processor = delivery_processor
 
         self.request_history = []
         self.active_requests = {}
@@ -163,6 +168,8 @@ class CommandProcessor:
         row = self.request_rows.get(request_id)
 
         if row is None:
+            if self.request_manager is not None:
+                self.request_manager.record_rejection(request_id, "UNKNOWN_REQUEST")
             raise CommandProcessorError(
                 f"Request '{request_id}' not found in requests.csv."
             )
@@ -171,11 +178,15 @@ class CommandProcessor:
         item_id = row["item_id"]
 
         if camp_id not in self.camps:
+            if self.request_manager is not None:
+                self.request_manager.record_rejection(request_id, "UNKNOWN_CAMP")
             raise CommandProcessorError(
                 f"Unknown camp: {camp_id}"
             )
 
         if item_id not in self.items:
+            if self.request_manager is not None:
+                self.request_manager.record_rejection(request_id, "UNKNOWN_ITEM")
             raise CommandProcessorError(
                 f"Unknown item: {item_id}"
             )
@@ -194,6 +205,8 @@ class CommandProcessor:
             )
 
         except (ValueError, KeyError) as exc:
+            if self.request_manager is not None:
+                self.request_manager.record_rejection(request_id, "INVALID_REQUEST")
             raise CommandProcessorError(
                 f"Invalid request '{request_id}': {exc}"
             ) from exc
@@ -379,6 +392,25 @@ class CommandProcessor:
                 arguments[1],
                 arguments[2]
             )
+
+        elif command_type == "CYCLE":
+            if self.cycle_engine is None:
+                raise CommandProcessorError("Cycle engine is not configured.")
+            try:
+                return self.cycle_engine.run(self._parse_timestamp(arguments[0]))
+            except (ValueError, RuntimeError) as exc:
+                raise CommandProcessorError(str(exc)) from exc
+
+        elif command_type == "DELIVERY":
+            if self.delivery_processor is None:
+                raise CommandProcessorError("Delivery processor is not configured.")
+            try:
+                return self.delivery_processor.process(arguments[0])
+            except (ValueError, DeliveryProcessorError) as exc:
+                raise CommandProcessorError(str(exc)) from exc
+
+        elif command_type.startswith("PRINT_"):
+            return None
 
         else:
             raise CommandProcessorError(

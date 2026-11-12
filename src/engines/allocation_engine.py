@@ -22,11 +22,13 @@ class AllocationEngine:
     CLASS_ORDER = (ItemClass.LIFE_SAVING, ItemClass.FOOD, ItemClass.SHELTER)
     RULE_IDS = ("BR-24", "BR-25", "BR-26", "BR-27", "BR-28", "BR-29", "BR-30")
 
-    def __init__(self, inventory_manager, request_manager, priority_engine, camps, zones, items):
+    def __init__(self, inventory_manager, request_manager, priority_engine, camps, zones, items,
+                 reachability_check=None):
         self.inventory = inventory_manager
         self.requests = request_manager
         self.priority = priority_engine
         self.camps, self.zones, self.items = camps, zones, items
+        self.reachability_check = reachability_check
         self.records: list[Allocation] = []
 
     def allocate(self, cycle_ts: datetime) -> list[Allocation]:
@@ -50,6 +52,17 @@ class AllocationEngine:
                     by_depot.setdefault(zone.serving_depot_id, []).append((managed, score))
                 for depot_id, ranked in by_depot.items():
                     batches = self.inventory.get_allocatable_batches(depot_id, item_id, cycle_ts)
+                    reachable = {}
+                    if self.reachability_check is not None:
+                        for managed, _ in ranked:
+                            reachable[managed.request.request_id] = [batch for batch in batches
+                                if self.reachability_check(batch, managed, cycle_ts)]
+                        ranked = [(managed, score) for managed, score in ranked
+                                  if reachable[managed.request.request_id]]
+                        batches = [batch for batch in batches if any(batch in reachable[m.request.request_id]
+                                                                     for m, _ in ranked)]
+                    if not ranked:
+                        continue
                     stock = sum(batch.quantity for batch in batches)
                     if stock <= 0:
                         continue
@@ -67,21 +80,21 @@ class AllocationEngine:
                         qty_left = granted[managed.request.request_id]
                         if not qty_left:
                             continue
-                        self.requests.record_allocation(managed.request.request_id, qty_left)
-                        while qty_left:
-                            while batch_index < len(batches) and batch_left == 0:
-                                batch_index += 1
-                                if batch_index < len(batches):
-                                    batch_left = batches[batch_index].quantity
-                            if batch_index >= len(batches):
-                                raise RuntimeError("Inventory changed during allocation.")
-                            amount = min(qty_left, batch_left)
-                            batch_id = batches[batch_index].batch_id
-                            batches[batch_index].quantity -= amount
-                            batch_left -= amount
+                        request_batches = reachable.get(managed.request.request_id, batches)
+                        allocated = 0
+                        for batch in request_batches:
+                            if qty_left <= 0:
+                                break
+                            if batch.quantity <= 0:
+                                continue
+                            amount = min(qty_left, batch.quantity)
+                            batch.quantity -= amount
                             qty_left -= amount
+                            allocated += amount
                             self.records.append(Allocation(cycle_ts, managed.request.request_id,
-                                managed.request.camp_id, item_id, score, batch_id, amount, self.RULE_IDS))
+                                managed.request.camp_id, item_id, score, batch.batch_id, amount, self.RULE_IDS))
+                        if allocated:
+                            self.requests.record_allocation(managed.request.request_id, allocated)
         return self.records[start:]
 
     def _pass(self, ranked, granted, stock, cap, limited):
@@ -103,9 +116,10 @@ class AllocationEngine:
                 for i in range(len(shares)):
                     if residue <= 0:
                         break
-                    if shares[i] < needs[i]:
-                        shares[i] += 1
-                        residue -= 1
+                    extra = min(residue, needs[i] - shares[i])
+                    if extra > 0:
+                        shares[i] += extra
+                        residue -= extra
             else:
                 shares = [0] * len(group)
             for (managed, _), amount in zip(group, shares):
