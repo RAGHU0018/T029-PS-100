@@ -8,7 +8,7 @@ The project implements PS-100 business rules BR-01 through BR-59 as documented i
 
 ## Current validation
 
-- Python test suite: **154 passed**.
+- Python test suite: **159 passed** (154 existing project tests and 5 dashboard tests).
 - Official sample: **16 cycles executed**; all **88 of 88 delivery records accounted for**; zero command errors.
 - Reconciliation: **82 `OK`** and **6 `DISCREPANCY`** records. Discrepancy rows are reconciled and auditable; they are not rejected deliveries. Details are below and in [docs/DELIVERY_SCHEDULE_RECONSTRUCTION.md](docs/DELIVERY_SCHEDULE_RECONSTRUCTION.md).
 - The application writes all five required output reports under `data/output/` by default.
@@ -35,11 +35,12 @@ Commands are read and executed in file order. `CYCLE` triggers write-offs, alloc
 | Delivery processor | `src/services/delivery_processor.py` | Matches delivery rows to planned trip, camp, item, and batch manifest lines. |
 | Reconciliation engine | `src/engines/reconciliation_engine.py` | Validates delivered/returned amounts, records shortfalls/discrepancies, restores returns, and tracks vehicle history. |
 | Reporting engine | `src/engines/reporting_engine.py` | Writes the five output CSVs using the official column order. |
+| Read-only dashboard | `dashboard/app.py` | Displays the generated reports and reference input data; does not run or modify the application engines. |
 
 ## Requirements
 
 - Python **3.10 or later**.
-- Packages listed in [`requirements.txt`](requirements.txt): `pytest` for tests and `tzdata` for portable IANA timezone data, including Windows environments.
+- Packages listed in [`requirements.txt`](requirements.txt): `pytest` for tests, `tzdata` for portable IANA timezone data, and `pandas`/`streamlit` for the dashboard.
 - No database or network connection is required.
 
 The application uses the Python standard library at runtime in addition to timezone data. Pytest is required to run the test suite.
@@ -63,6 +64,19 @@ In VS Code, open the repository root folder, select the `.venv` interpreter with
 On macOS or Linux, use `python3 -m venv .venv`, `source .venv/bin/activate`, `python -m pip install -r requirements.txt`, `python -m pytest -v`, and `python -m src.main --input-dir data/input --output-dir data/output`.
 
 The CLI prints the number of cycles and reports written. It returns a nonzero exit code when command errors occur; reports are still written so the results can be inspected. A normal official sample run prints `Completed 16 cycles; wrote 5 reports.` and no command errors.
+
+### Run the read-only dashboard
+
+After installing requirements and generating the reports, run this command from the repository root:
+
+```powershell
+\.venv\Scripts\Activate.ps1
+streamlit run dashboard/app.py
+```
+
+If PowerShell activation is restricted, call the environment's executable directly: `.venv\Scripts\streamlit.exe run dashboard/app.py`.
+
+The dashboard reads the five CSVs in `data/output/` and uses camp, zone, item, and opening batch reference files from `data/input/`. It does not execute a cycle or write operational reports. Missing report files are shown as warnings and the corresponding dashboard sections remain empty. The opening-stock panel reconciles opening batches against allocation, return, and write-off report rows; receipt-created batches are shown separately because the five output reports do not include a receipt acceptance ledger or a full ending-inventory snapshot.
 
 The application overwrites report files with the same names in the selected output directory on each run. Preserve or copy any reports you need before rerunning with that directory.
 
